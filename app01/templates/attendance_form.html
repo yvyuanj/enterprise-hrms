@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block title %}考勤{% if form.instance.pk %}编辑{% else %}新增{% endif %}{% endblock %}
+{% block content %}
+<div class="panel panel-default panel-hrms form-card">
+    <div class="panel-heading">
+        <span class="glyphicon glyphicon-time"></span> {% if form.instance.pk %}编辑考勤{% else %}新增考勤{% endif %}
+        <span class="label label-info" style="margin-left:8px">状态按上下班时间自动判定</span>
+    </div>
+    <div class="panel-body">
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% include '_field.html' with field=form.employee %}
+            {% include '_field.html' with field=form.date %}
+            {% include '_field.html' with field=form.check_in %}
+            {% include '_field.html' with field=form.check_out %}
+            <p class="help-block">判定规则：缺卡=缺勤；晚于09:00上班=迟到；早于18:00下班=早退；其余=按时。</p>
+            <div style="margin-top:20px">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a href="/attendance/list/" class="btn btn-default">返回</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
