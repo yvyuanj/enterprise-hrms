@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}企业员工管理系统{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-theme.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/hrms.css' %}">
+</head>
+<body>
+<nav class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="/index/"><span class="glyphicon glyphicon-th-large"></span> 企业员工管理系统</a>
+        <ul class="nav-menu">
+            {% if request.user|has_perm:'index' %}
+                <li class="{% if request.path == '/index/' %}active{% endif %}"><a href="/index/">首页</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'depart_list' %}
+                <li class="{% if request.path|slice:':6' == '/depar' %}active{% endif %}"><a href="/depart/list/">部门管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'employee_list' %}
+                <li class="{% if request.path|slice:':9' == '/employee' %}active{% endif %}"><a href="/employee/list/">员工管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'attendance_list' %}
+                <li class="{% if request.path|slice:':11' == '/attendance' %}active{% endif %}"><a href="/attendance/list/">考勤管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'salary_list' %}
+                <li class="{% if request.path|slice:':7' == '/salary' %}active{% endif %}"><a href="/salary/list/">薪资管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'announcement_list' %}
+                <li class="{% if request.path|slice:':13' == '/announcement' %}active{% endif %}"><a href="/announcement/list/">公告管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'task_list' %}
+                <li class="{% if request.path|slice:':5' == '/task' %}active{% endif %}"><a href="/task/list/">任务管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'chart' %}
+                <li class="{% if request.path|slice:':6' == '/chart' %}active{% endif %}"><a href="/chart/">数据统计</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'user_list' %}
+                <li class="{% if request.path|slice:':5' == '/user' %}active{% endif %}"><a href="/user/list/">用户管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'role_list' %}
+                <li class="{% if request.path|slice:':5' == '/role' %}active{% endif %}"><a href="/role/list/">角色管理</a></li>
+            {% endif %}
+        </ul>
+        <div class="nav-user">
+            <span class="user-toggle">
+                <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
+                <span class="role-badge">{{ request.user.role_names }}</span>
+                <span class="caret">▾</span>
+            </span>
+            <div class="dropdown">
+                <a href="/logout/"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container container-fluid">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="{% static 'plugins/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap.min.js' %}"></script>
+<script>
+    // 统一为所有 jQuery AJAX 携带 CSRF Token
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            }
+        }
+    });
+</script>
+{% block js %}{% endblock %}
+</body>
+</html>

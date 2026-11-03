@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+{% block title %}首页 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="num">{{ depart_count }}</div>
+            <div class="label-text"><span class="glyphicon glyphicon-th"></span> 部门数量</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card c-green">
+            <div class="num">{{ employee_count }}</div>
+            <div class="label-text"><span class="glyphicon glyphicon-user"></span> 员工数量</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card c-orange">
+            <div class="num">{{ announcement_count }}</div>
+            <div class="label-text"><span class="glyphicon glyphicon-bullhorn"></span> 公告数量</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card c-purple">
+            <div class="num">{{ salary_count }}</div>
+            <div class="label-text"><span class="glyphicon glyphicon-yen"></span> 薪资记录</div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-top:15px">
+    <div class="col-md-3">
+        <h4 style="color:#666"><span class="glyphicon glyphicon-flash"></span> 快捷入口</h4>
+        {% if request.user|has_perm:'depart_list' %}
+        <a class="quick-link" href="/depart/list/"><span class="glyphicon glyphicon-th"></span>部门管理</a>
+        {% endif %}
+        {% if request.user|has_perm:'employee_list' %}
+        <a class="quick-link" href="/employee/list/"><span class="glyphicon glyphicon-user"></span>员工管理</a>
+        {% endif %}
+        {% if request.user|has_perm:'attendance_list' %}
+        <a class="quick-link" href="/attendance/list/"><span class="glyphicon glyphicon-time"></span>考勤管理</a>
+        {% endif %}
+        {% if request.user|has_perm:'salary_list' %}
+        <a class="quick-link" href="/salary/list/"><span class="glyphicon glyphicon-yen"></span>薪资管理</a>
+        {% endif %}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default panel-hrms">
+            <div class="panel-heading"><span class="glyphicon glyphicon-bullhorn"></span> 公告</div>
+            <div class="panel-body">
+                {% for a in announcements %}
+                    <div style="padding:6px 0;border-bottom:1px dashed #eee">
+                        {{ a.create_time|date:"Y-m-d" }} &nbsp;
+                        {{ a.is_top|top_badge }}
+                        <strong>{{ a.title }}</strong>
+                        <span style="color:#999;font-size:12px">发布人：{{ a.publisher.username }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color:#999">暂无公告，可在「公告管理」中发布。</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

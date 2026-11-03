@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}数据统计 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-box">
+            <h4 class="chart-title"><span class="glyphicon glyphicon-stats"></span> 各部门员工人数分布</h4>
+            <div id="chartDepart" style="width:100%;height:380px"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-box">
+            <h4 class="chart-title"><span class="glyphicon glyphicon-signal"></span> 各月薪资趋势</h4>
+            <div id="chartSalary" style="width:100%;height:380px"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{% static 'plugins/echarts.min.js' %}"></script>
+<script>
+    // 部门人数分布（AJAX 取数）
+    $.getJSON('/chart/depart-data/', function (res) {
+        var names = [], counts = [];
+        (res.data || []).forEach(function (d) { names.push(d.depart__name); counts.push(d.count); });
+        var chart = echarts.init(document.getElementById('chartDepart'));
+        chart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: 40, right: 20, bottom: 40, top: 20 },
+            xAxis: { type: 'category', data: names },
+            yAxis: { type: 'value', minInterval: 1 },
+            series: [{
+                type: 'bar', data: counts, barMaxWidth: 44,
+                itemStyle: { color: '#337ab7', borderRadius: [4, 4, 0, 0] },
+                label: { show: true, position: 'top' }
+            }]
+        });
+        window.addEventListener('resize', function () { chart.resize(); });
+    });
+
+    // 各月薪资趋势（AJAX 取数）
+    $.getJSON('/chart/salary-trend/', function (res) {
+        var months = [], basic = [], total = [];
+        (res.data || []).forEach(function (d) {
+            months.push(d.month); basic.push(d.basic); total.push(d.total);
+        });
+        var chart = echarts.init(document.getElementById('chartSalary'));
+        chart.setOption({
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['基本工资', '实发'] },
+            grid: { left: 60, right: 20, bottom: 40, top: 30 },
+            xAxis: { type: 'category', data: months },
+            yAxis: { type: 'value' },
+            series: [
+                { name: '基本工资', type: 'line', smooth: true, data: basic },
+                { name: '实发', type: 'line', smooth: true, data: total }
+            ]
+        });
+        window.addEventListener('resize', function () { chart.resize(); });
+    });
+</script>
+{% endblock %}
