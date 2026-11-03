@@ -1,0 +1,18 @@
+{% load static %}
+{% comment %}
+通用表单字段渲染片段。
+用法：
+  {% include '_field.html' with field=form.name %}
+  {% include '_field.html' with field=form.avatar as_image=True %}
+{% endcomment %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+    <label class="control-label">{{ field.label }}</label>
+    {% if as_image and field.value %}
+        <div style="margin-bottom:6px">
+            <img src="{{ field.value.url }}" style="width:70px;height:70px;border-radius:6px;object-fit:cover" alt="当前头像">
+        </div>
+    {% endif %}
+    {{ field }}
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+    {% if field.errors %}<ul class="errorlist">{{ field.errors|unordered_list }}</ul>{% endif %}
+</div>
