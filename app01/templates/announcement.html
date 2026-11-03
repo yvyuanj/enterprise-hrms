@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+{% block title %}公告管理 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="panel panel-default panel-hrms">
+    <div class="panel-heading clearfix">
+        <span class="glyphicon glyphicon-bullhorn"></span> 公告管理
+        <div class="btn-group pull-right">
+            {% if request.user|has_perm:'announcement_add' %}
+            <a href="/announcement/add/" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"></span> 发布公告</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="panel-body">
+        <form method="get" class="form-inline" style="margin-bottom:12px">
+            <div class="form-group">
+                <input type="text" name="kw" value="{{ kw }}" class="form-control" placeholder="按标题搜索">
+            </div>
+            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> 搜索</button>
+        </form>
+
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr><th>ID</th><th>标题</th><th>内容</th><th>发布人</th><th>发布时间</th><th>置顶</th><th style="width:190px">操作</th></tr>
+            </thead>
+            <tbody>
+            {% for a in announcement_list %}
+                <tr>
+                    <td>{{ a.id }}</td>
+                    <td><strong>{{ a.title }}</strong></td>
+                    <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.content }}</td>
+                    <td>{{ a.publisher.username }}</td>
+                    <td>{{ a.create_time|date:"Y-m-d H:i" }}</td>
+                    <td>{{ a.is_top|top_badge }}</td>
+                    <td>
+                        {% if request.user|has_perm:'announcement_toggle_top' %}
+                        <a href="javascript:void(0)" class="btn btn-info btn-xs" onclick="toggleTop({{ a.id }})">{{ a.is_top|yesno:'取消置顶,置顶' }}</a>
+                        {% endif %}
+                        {% if request.user|has_perm:'announcement_edit' %}
+                        <a href="/announcement/edit/{{ a.id }}/" class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-pencil"></span> 编辑</a>
+                        {% endif %}
+                        {% if request.user|has_perm:'announcement_del' %}
+                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" onclick="delAnn({{ a.id }})"><span class="glyphicon glyphicon-trash"></span> 删除</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" style="text-align:center;color:#999">暂无公告</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-center">{{ pagination.page_html }}</div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    function toggleTop(id) {
+        $.post('/announcement/toggle-top/' + id + '/', {}, function (res) {
+            if (res.status) { location.reload(); } else { alert(res.error || '操作失败'); }
+        });
+    }
+    function delAnn(id) {
+        if (!confirm('确定删除该公告吗？')) return;
+        $.post('/announcement/del/' + id + '/', {}, function (res) {
+            if (res.status) { alert('删除成功'); location.reload(); } else { alert(res.error || '删除失败'); }
+        });
+    }
+</script>
+{% endblock %}
