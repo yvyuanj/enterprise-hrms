@@ -1,0 +1,121 @@
+{% extends 'layout.html' %}
+{% block title %}任务管理 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <div class="panel panel-default panel-hrms">
+            <div class="panel-heading"><span class="glyphicon glyphicon-tasks"></span> 任务列表</div>
+            <div class="panel-body">
+                <table class="table table-hover table-bordered" id="taskTable">
+                    <thead>
+                    <tr><th>ID</th><th>级别</th><th>标题</th><th>详情</th><th>负责人</th><th>创建时间</th><th style="width:70px">操作</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for t in task_list %}
+                        <tr id="task-{{ t.id }}">
+                            <td>{{ t.id }}</td>
+                            <td>{{ t.level|status_badge:'task' }}</td>
+                            <td>{{ t.title }}</td>
+                            <td>{{ t.detail }}</td>
+                            <td>{{ t.owner.name }}</td>
+                            <td>{{ t.create_time|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if request.user|has_perm:'task_del' %}
+                                <a href="javascript:void(0)" class="btn btn-danger btn-xs" onclick="delTask({{ t.id }})"><span class="glyphicon glyphicon-trash"></span></a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" style="text-align:center;color:#999">暂无任务</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="panel panel-default panel-hrms">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-plus"></span> 新增任务（AJAX 异步提交，不刷新页面）
+            </div>
+            <div class="panel-body">
+                <div id="taskErrorBox" class="alert alert-danger" style="display:none"></div>
+                <form id="taskForm" novalidate>
+                    {% csrf_token %}
+                    {% include '_field.html' with field=form.level %}
+                    {% include '_field.html' with field=form.title %}
+                    {% include '_field.html' with field=form.detail %}
+                    {% include '_field.html' with field=form.owner %}
+                    <button type="submit" class="btn btn-primary" id="taskSubmitBtn">提交</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    // 供 JS 动态插入行时决定是否显示删除按钮（权限控制）
+    var CAN_DEL_TASK = {% if request.user|has_perm:'task_del' %}true{% else %}false{% endif %};
+    var $errorBox = $('#taskErrorBox');
+
+    function clearFieldErrors() {
+        $('#taskForm .has-error').removeClass('has-error');
+        $errorBox.hide().html('');
+    }
+
+    $('#taskForm').on('submit', function (e) {
+        e.preventDefault();
+        clearFieldErrors();
+        $.ajax({
+            url: '/task/add/',
+            type: 'POST',
+            data: $('#taskForm').serialize(),
+            dataType: 'json',
+            success: function (res) {
+                if (res.status) {
+                    var delBtn = CAN_DEL_TASK
+                        ? '<a href="javascript:void(0)" class="btn btn-danger btn-xs" onclick="delTask(' + res.data.id + ')"><span class="glyphicon glyphicon-trash"></span></a>'
+                        : '';
+                    var row = '<tr id="task-' + res.data.id + '">'
+                        + '<td>' + res.data.id + '</td>'
+                        + '<td>' + res.data.level + '</td>'
+                        + '<td>' + res.data.title + '</td>'
+                        + '<td>' + res.data.detail + '</td>'
+                        + '<td>' + res.data.owner + '</td>'
+                        + '<td>' + res.data.create_time + '</td>'
+                        + '<td>' + delBtn + '</td>'
+                        + '</tr>';
+                    $('#taskTable tbody').prepend(row);
+                    $('#taskForm')[0].reset();
+                    alert('提交成功');
+                } else {
+                    // 逐字段回显错误，不刷新页面
+                    var hasError = false;
+                    $.each(res.errors || {}, function (field, msg) {
+                        var $field = $('[name=' + field + ']').closest('.form-group');
+                        if ($field.length) {
+                            $field.addClass('has-error');
+                            $field.find('.errorlist').remove();
+                            $field.append('<ul class="errorlist"><li>' + msg + '</li></ul>');
+                            hasError = true;
+                        }
+                    });
+                    if (!hasError) { $errorBox.show().html('提交失败，请检查输入'); }
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 403) { alert('没有操作权限'); }
+                else { alert('服务器错误'); }
+            }
+        });
+    });
+
+    function delTask(id) {
+        if (!confirm('确定删除该任务吗？')) return;
+        $.post('/task/del/' + id + '/', {}, function (res) {
+            if (res.status) { $('#task-' + id).remove(); } else { alert(res.error || '删除失败'); }
+        });
+    }
+</script>
+{% endblock %}
