@@ -1,7 +1,7 @@
 Django>=5.2,<5.3
 Pillow>=10.4
-# MySQL 驱动二选一：
-# 方案A：PyMySQL（纯 Python，无需编译，推荐课程环境使用）
+# MySQL driver - choose one:
+# Option A: PyMySQL (pure python, no compile, recommended for course)
 PyMySQL>=1.1
-# 方案B：mysqlclient（需要本地编译，若本机有 MySQL C 库可改用）
+# Option B: mysqlclient (needs local MySQL C library); uncomment if needed
 # mysqlclient>=2.2
