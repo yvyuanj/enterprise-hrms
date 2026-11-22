@@ -69,15 +69,19 @@ class SalaryTotalTests(BaseSetup):
     """薪资实发自动计算。"""
 
     def test_total_formula(self):
+        # 构造薪资记录：基本工资 8000、奖金 1000、扣款 500
         s = models.Salary(employee=self.employee, month='2026-11',
                           basic=8000, bonus=1000, deduction=500)
-        s.save()
+        s.save()  # 保存时触发实发工资自动计算
+        # 实发 = 基本工资 + 奖金 - 扣款 = 8500
         self.assertEqual(s.total, 8500)
 
     def test_total_negative_deduction_large(self):
+        # 构造薪资记录：基本工资 5000、无奖金、扣款 6000（大于基本工资）
         s = models.Salary(employee=self.employee, month='2026-10',
                           basic=5000, bonus=0, deduction=6000)
-        s.save()
+        s.save()  # 保存时触发实发工资自动计算
+        # 实发 = 5000 + 0 - 6000 = -1000，验证扣款超额时允许为负数
         self.assertEqual(s.total, -1000)
 
 

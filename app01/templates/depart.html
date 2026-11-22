@@ -1,6 +1,32 @@
 {% extends 'layout.html' %}
 {% block title %}部门管理 - 企业员工管理系统{% endblock %}
 {% block content %}
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+{% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+{% endif %}
+
+{% if request.user|has_perm:'depart_add' %}
+<!-- 批量上传（Excel）：文件在 request.FILES 里，enctype 不能少 -->
+<div class="panel panel-default panel-hrms">
+    <div class="panel-heading"><span class="glyphicon glyphicon-import"></span> 批量上传部门（Excel）</div>
+    <div class="panel-body">
+        <form method="post" enctype="multipart/form-data" action="/depart/multi/" class="form-inline">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="file" name="exc" accept=".xlsx">
+            </div>
+            <input type="submit" value="上传" class="btn btn-info btn-sm">
+            <span class="help-block" style="display:inline-block;margin-left:10px">
+                仅支持 .xlsx，第一行为标题行，从第 2 行起取第 1 列作为部门名称（重名自动跳过）。
+            </span>
+        </form>
+    </div>
+</div>
+{% endif %}
+
 <div class="panel panel-default panel-hrms">
     <div class="panel-heading clearfix">
         <span class="glyphicon glyphicon-th"></span> 部门管理

@@ -36,6 +36,13 @@ ALL_PERMISSIONS = [
 
     ('task_list', '查看任务'), ('task_add', '新增任务'), ('task_del', '删除任务'),
 
+    ('order_list', '查看订单'), ('order_add', '新增订单'),
+    ('order_edit', '编辑订单'), ('order_del', '删除订单'),
+
+    ('upload', '文件上传'),
+
+    ('city_list', '查看城市'), ('city_add', '新建城市'),
+
     ('user_list', '查看用户'), ('user_add', '新增用户'),
     ('user_edit', '编辑用户'), ('user_del', '删除用户'),
     ('user_reset_pwd', '重置密码'),
@@ -62,6 +69,9 @@ ROLES = {
             'salary_list', 'salary_add', 'salary_edit',
             'announcement_list',
             'task_list', 'task_add',
+            'order_list', 'order_add', 'order_edit',
+            'upload',
+            'city_list', 'city_add',
         ],
     },
     '普通员工': {

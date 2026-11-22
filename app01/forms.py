@@ -183,3 +183,90 @@ class TaskModelForm(forms.ModelForm):
         if title and len(title) > 64:
             raise ValidationError('标题长度不能超过64个字符')
         return title
+
+
+class OrderModelForm(forms.ModelForm):
+    """订单表单（第18章）。
+
+    exclude 掉 oid（订单号）与 admin（管理员）：
+    这两个字段由后端自动生成，不能开放给用户修改。
+    """
+
+    class Meta:
+        model = models.Order
+        fields = ['title', 'price', 'status']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }
+        error_messages = {
+            'title': {'required': '名称不能为空'},
+            'price': {'required': '价格不能为空'},
+            'status': {'required': '请选择状态'},
+        }
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if title and len(title) > 32:
+            raise ValidationError('名称长度不能超过32个字符')
+        return title
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price is not None and price < 0:
+            raise ValidationError('价格不能为负数')
+        return price
+
+
+class BossForm(forms.ModelForm):
+    """老板表单（第20.2章：普通 Form 方式，文件由视图手工写盘）。
+
+    img 不是 Boss 的模型字段（模型里是 CharField 存路径），
+    这里单独声明一个 FileField，只为在页面上出现文件选择框。
+    """
+
+    img = forms.FileField(label='头像', required=False)
+
+    class Meta:
+        model = models.Boss
+        fields = ['name', 'age']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 文件框单独在模板里渲染，这里只给文本字段套上 bootstrap 样式
+        for name, field in self.fields.items():
+            if name == 'img':
+                continue
+            field.widget.attrs.setdefault('class', 'form-control')
+
+
+class CityModelForm(forms.ModelForm):
+    """城市表单（第21章：ModelForm + FileField，文件自动保存）。"""
+
+    class Meta:
+        model = models.City
+        fields = ['name', 'count', 'img']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            # 文件框不套 form-control，否则 Bootstrap 会把它渲染成文本框样式
+            if name == 'img':
+                continue
+            field.widget.attrs.setdefault('class', 'form-control')
+
+
+class XXModelForm(forms.ModelForm):
+    """头像示例表单（第20.4章）。"""
+
+    class Meta:
+        model = models.XX
+        fields = ['title', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name == 'image':
+                continue
+            field.widget.attrs.setdefault('class', 'form-control')

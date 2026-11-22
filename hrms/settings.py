@@ -63,6 +63,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'hrms'),
         'USER': os.environ.get('DB_USER', 'root'),
+        # 密码一律从环境变量读取，仓库中不保存真实密码
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
         'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('DB_PORT', '3306'),
@@ -76,6 +77,15 @@ if os.environ.get('DB_ENGINE') == 'sqlite':
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+
+# ============ 大模型 AI 助手配置 ============
+# Key 只从环境变量读取，禁止硬编码进代码、禁止提交 Git。
+# Windows 永久配置（PowerShell）：
+#   setx AI_API_KEY "你的Key" ; setx AI_BASE_URL "https://api.siliconflow.cn/v1" ; setx AI_MODEL "Qwen/Qwen2.5-7B-Instruct"
+AI_API_KEY = os.environ.get('AI_API_KEY', '')
+AI_BASE_URL = os.environ.get('AI_BASE_URL', 'https://api.siliconflow.cn/v1')
+AI_MODEL = os.environ.get('AI_MODEL', 'Qwen/Qwen2.5-7B-Instruct')
+AI_TIMEOUT = 30  # 单次请求超时（秒），防止页面长时间卡住
 
 # ============ 密码与认证 ============
 AUTH_PASSWORD_VALIDATORS = [

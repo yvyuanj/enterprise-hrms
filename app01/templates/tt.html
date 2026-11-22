@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block title %}头像预览 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="panel panel-default panel-hrms form-card">
+    <div class="panel-heading"><span class="glyphicon glyphicon-picture"></span> 新建（头像本地预览）</div>
+    <div class="panel-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {# 头像预览框：整体透明文件控件覆盖在图片上 #}
+            <div style="height:100px;width:100px;padding:2px;border:1px solid #ddd;position:relative;margin-bottom:12px">
+                <img id="previewImg" src="/static/img/default-avatar.png"
+                     style="height:100%;width:100%;border:0;overflow:hidden;object-fit:cover">
+                <input id="avatarImg" name="image" type="file"
+                       accept="image/*"
+                       style="top:0;left:0;right:0;bottom:0;opacity:0;position:absolute;z-index:102;cursor:pointer">
+            </div>
+
+            {% for field in form %}
+                {% if field.name != 'image' %}
+                    {% include '_field.html' with field=field %}
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">提 交</button>
+            <a href="/upload/modal/form/" class="btn btn-default">下一个示例</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // FileReader 只在浏览器本地预览，并没有真正上传
+    $(function () {
+        $('#avatarImg').on('change', function () {
+            var file_obj = this.files[0];
+            if (!file_obj) return;
+            var reader = new FileReader();
+            reader.readAsDataURL(file_obj);
+            reader.onload = function (e) {
+                $('#previewImg')[0].src = this.result;
+            };
+        });
+    });
+</script>
+{% endblock %}

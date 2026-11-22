@@ -4,14 +4,21 @@ from django.shortcuts import render
 
 from app01 import forms, models
 from app01.middleware.auth import require_permission
+from app01.utils.pagination import Pagination
 
 
 @require_permission('task_list')
 def task_list(request):
-    """任务列表（GET 渲染页面，列表数据含于页面）。"""
-    queryset = models.Task.objects.select_related('owner').order_by('-create_time')
+    """任务列表：分页展示（每页 10 条）。
+
+    查询集直接交给 Pagination，内部用切片实现 LIMIT/OFFSET，
+    不会把全部数据一次性取出来。
+    """
+    queryset = models.Task.objects.select_related('owner').order_by('-create_time', '-id')
+    page_object = Pagination(queryset, request, 10)
     return render(request, 'task.html', {
-        'task_list': queryset[:100],
+        'task_list': page_object.page_queryset,
+        'page_string': page_object.page_html(),
         'form': forms.TaskModelForm(),
     })
 

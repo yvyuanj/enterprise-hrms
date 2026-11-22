@@ -14,3 +14,9 @@ static_collected/
 .idea/
 .vscode/
 .DS_Store
+
+# 本地启动脚本（含真实 API Key / 数据库密码，禁止提交）
+_run_ai.ps1
+*.local.ps1
+.env
+.env.*

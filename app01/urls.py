@@ -1,8 +1,9 @@
 """app01 路由。"""
 from django.urls import path
 
-from app01.views import account, announcement, attendance, dashboard, depart
+from app01.views import account, ai, announcement, attendance, dashboard, depart
 from app01.views import employee, salary, task, user
+from app01.views import order, upload, city
 
 urlpatterns = [
     # 首页 / 可视化
@@ -20,6 +21,7 @@ urlpatterns = [
     # 部门
     path('depart/list/', depart.depart_list),
     path('depart/add/', depart.depart_add),
+    path('depart/multi/', depart.depart_multi),
     path('depart/edit/<int:pk>/', depart.depart_edit),
     path('depart/del/<int:pk>/', depart.depart_del),
 
@@ -52,6 +54,29 @@ urlpatterns = [
     path('task/list/', task.task_list),
     path('task/add/', task.task_add),
     path('task/del/<int:pk>/', task.task_del),
+
+    # AI 智能助手
+    path('ai/', ai.assistant),
+    path('ai/jd/', ai.generate_jd),
+    path('ai/qa/', ai.knowledge_qa),
+    path('ai/data-comment/', ai.data_comment),
+
+    # 订单管理（第18章）
+    path('order/list/', order.order_list),
+    path('order/add/', order.order_add),
+    path('order/delete/', order.order_delete),
+    path('order/detail/', order.order_detail),
+    path('order/edit/', order.order_edit),
+
+    # 文件上传（第20章）
+    path('upload/list/', upload.upload_list),
+    path('upload/form/', upload.upload_form),
+    path('upload/modal/form/', upload.upload_modal_form),
+    path('tt/', upload.tt),
+
+    # 城市列表（第21章）
+    path('city/list/', city.city_list),
+    path('city/add/', city.city_add),
 
     # 用户 / 角色
     path('user/list/', user.user_list),

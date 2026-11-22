@@ -30,6 +30,8 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {# 分页页码：由后端 Pagination.page_html() 生成 #}
+                <div class="text-center">{{ page_string }}</div>
             </div>
         </div>
     </div>
@@ -74,21 +76,10 @@
             dataType: 'json',
             success: function (res) {
                 if (res.status) {
-                    var delBtn = CAN_DEL_TASK
-                        ? '<a href="javascript:void(0)" class="btn btn-danger btn-xs" onclick="delTask(' + res.data.id + ')"><span class="glyphicon glyphicon-trash"></span></a>'
-                        : '';
-                    var row = '<tr id="task-' + res.data.id + '">'
-                        + '<td>' + res.data.id + '</td>'
-                        + '<td>' + res.data.level + '</td>'
-                        + '<td>' + res.data.title + '</td>'
-                        + '<td>' + res.data.detail + '</td>'
-                        + '<td>' + res.data.owner + '</td>'
-                        + '<td>' + res.data.create_time + '</td>'
-                        + '<td>' + delBtn + '</td>'
-                        + '</tr>';
-                    $('#taskTable tbody').prepend(row);
                     $('#taskForm')[0].reset();
-                    alert('提交成功');
+                    alert('添加成功');
+                    // 分页后新增数据在第一页，直接刷新保证页码与数据一致
+                    location.reload();
                 } else {
                     // 逐字段回显错误，不刷新页面
                     var hasError = false;

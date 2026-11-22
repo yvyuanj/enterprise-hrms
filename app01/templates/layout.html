@@ -8,6 +8,100 @@
     <link rel="stylesheet" href="{% static 'plugins/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-theme.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/hrms.css' %}">
+    <style>
+        /* 右下角悬浮 AI 助手头像按钮 */
+        .ai-float-avatar {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #d0d4dc;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+            overflow: hidden;
+            z-index: 9999;
+            cursor: pointer;
+            background: #fff;
+            transition: transform .15s ease;
+            padding: 0;
+        }
+        .ai-float-avatar:hover { transform: scale(1.08); }
+        .ai-float-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* 悬浮聊天面板 */
+        .ai-chat-panel {
+            position: fixed;
+            right: 24px;
+            bottom: 96px;
+            width: 360px;
+            height: 480px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .ai-chat-panel.open { display: flex; }
+        .ai-chat-header {
+            background: #337ab7;
+            color: #fff;
+            padding: 10px 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ai-chat-header .close-btn { cursor: pointer; font-size: 18px; line-height: 1; }
+        .ai-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: #f5f6f8;
+        }
+        .ai-msg { margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+        .ai-msg.user { text-align: right; }
+        .ai-msg .bubble {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 8px;
+            max-width: 85%;
+            text-align: left;
+        }
+        .ai-msg.user .bubble { background: #337ab7; color: #fff; }
+        .ai-msg.bot .bubble { background: #fff; color: #333; border: 1px solid #e0e0e0; }
+        .ai-chat-input {
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            padding: 8px;
+            gap: 6px;
+        }
+        .ai-chat-input input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 13px;
+        }
+        .ai-chat-input button {
+            background: #337ab7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .ai-chat-input button:disabled { background: #99b8d8; }
+        .ai-quick-links {
+            padding: 6px 12px;
+            border-top: 1px solid #eee;
+            font-size: 11px;
+        }
+        .ai-quick-links a { color: #337ab7; text-decoration: none; }
+    </style>
 </head>
 <body>
 <nav class="topbar">
@@ -34,6 +128,18 @@
             {% endif %}
             {% if request.user|has_perm:'task_list' %}
                 <li class="{% if request.path|slice:':5' == '/task' %}active{% endif %}"><a href="/task/list/">任务管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'order_list' %}
+                <li class="{% if request.path|slice:':6' == '/order' %}active{% endif %}"><a href="/order/list/">订单管理</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'city_list' %}
+                <li class="{% if request.path|slice:':5' == '/city' %}active{% endif %}"><a href="/city/list/">城市列表</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'upload' %}
+                <li class="{% if request.path|slice:':7' == '/upload' or request.path|slice:':4' == '/tt/' %}active{% endif %}"><a href="/upload/form/">文件上传</a></li>
+            {% endif %}
+            {% if request.user|has_perm:'ai_assistant' %}
+                <li class="{% if request.path|slice:':4' == '/ai/' %}active{% endif %}"><a href="/ai/">AI助手</a></li>
             {% endif %}
             {% if request.user|has_perm:'chart' %}
                 <li class="{% if request.path|slice:':6' == '/chart' %}active{% endif %}"><a href="/chart/">数据统计</a></li>
@@ -62,6 +168,29 @@
     {% block content %}{% endblock %}
 </div>
 
+{# 右下角悬浮 AI 助手头像按钮：点击弹出聊天窗口 #}
+<button class="ai-float-avatar" id="aiFloatBtn" title="AI 智能助手">
+    <img src="{% static 'img/ai-avatar.jpg' %}" alt="AI助手">
+</button>
+
+{# 悬浮聊天面板 #}
+<div class="ai-chat-panel" id="aiChatPanel">
+    <div class="ai-chat-header">
+        <span><span class="glyphicon glyphicon-education"></span> AI 智能助手</span>
+        <span class="close-btn" id="aiChatClose">&times;</span>
+    </div>
+    <div class="ai-chat-body" id="aiChatBody">
+        <div class="ai-msg bot"><span class="bubble">你好！我是 HR 智能助手，可以问我公司制度相关问题（考勤、报销、请假等）。</span></div>
+    </div>
+    <div class="ai-chat-input">
+        <input type="text" id="aiChatInput" placeholder="输入你的问题...">
+        <button id="aiChatSend">发送</button>
+    </div>
+    <div class="ai-quick-links">
+        <a href="/ai/" target="_blank">打开完整 AI 工作台 &raquo;</a>
+    </div>
+</div>
+
 <script src="{% static 'plugins/jquery-3.6.0.min.js' %}"></script>
 <script src="{% static 'plugins/bootstrap.min.js' %}"></script>
 <script>
@@ -72,6 +201,48 @@
                 xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
             }
         }
+    });
+
+    // === 悬浮 AI 聊天面板交互 ===
+    $(function () {
+        var $panel = $('#aiChatPanel');
+        var $body = $('#aiChatBody');
+        var $input = $('#aiChatInput');
+        var $send = $('#aiChatSend');
+
+        // 点击头像：打开/关闭面板
+        $('#aiFloatBtn').on('click', function () {
+            $panel.toggleClass('open');
+            if ($panel.hasClass('open')) { $input.focus(); }
+        });
+        // 点关闭按钮
+        $('#aiChatClose').on('click', function () { $panel.removeClass('open'); });
+
+        function appendMsg(text, who) {
+            var html = '<div class="ai-msg ' + who + '"><span class="bubble">' +
+                       $('<div>').text(text).html() + '</span></div>';
+            $body.append(html);
+            $body.scrollTop($body[0].scrollHeight);
+        }
+
+        function send() {
+            var q = $.trim($input.val());
+            if (!q) return;
+            appendMsg(q, 'user');
+            $input.val('');
+            $send.prop('disabled', true).text('思考中...');
+            $.post('/ai/qa/', {question: q}, function (res) {
+                if (res.status) { appendMsg(res.data, 'bot'); }
+                else { appendMsg(res.error || '出错了', 'bot'); }
+            }).fail(function () {
+                appendMsg('网络错误，请稍后重试', 'bot');
+            }).always(function () {
+                $send.prop('disabled', false).text('发送');
+            });
+        }
+
+        $send.on('click', send);
+        $input.on('keydown', function (e) { if (e.keyCode === 13) send(); });
     });
 </script>
 {% block js %}{% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'layout.html' %}
+{% block title %}AI智能助手 - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="ai-page">
+    <!-- 页面标题 -->
+    <div class="ai-header">
+        <h3 style="margin:0"><span class="glyphicon glyphicon-education"></span> AI 智能助手</h3>
+        <p class="text-muted" style="margin:6px 0 0;font-size:13px">基于大模型的 HR 智能工具：招聘 JD 生成、制度问答、数据点评</p>
+    </div>
+
+    <!-- 任务栏（标签页） -->
+    <ul class="nav nav-tabs ai-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#tab-jd" aria-controls="tab-jd" role="tab" data-toggle="tab">
+                <span class="glyphicon glyphicon-bullhorn"></span> 智能招聘 JD
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#tab-qa" aria-controls="tab-qa" role="tab" data-toggle="tab">
+                <span class="glyphicon glyphicon-question-sign"></span> 制度知识库问答
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#tab-data" aria-controls="tab-data" role="tab" data-toggle="tab">
+                <span class="glyphicon glyphicon-stats"></span> 数据智能点评
+            </a>
+        </li>
+    </ul>
+
+    <!-- 标签内容区 -->
+    <div class="tab-content ai-tab-content">
+        <!-- 模块 A：招聘 JD -->
+        <div role="tabpanel" class="tab-pane active" id="tab-jd">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>生成招聘 JD</strong></div>
+                        <div class="panel-body">
+                            <p class="text-muted" style="font-size:12px">输入岗位名称，AI 自动生成岗位职责、任职要求、薪资范围。</p>
+                            <label>岗位名称</label>
+                            <input type="text" id="jdTitle" class="form-control" placeholder="例如：Java 开发工程师">
+                            <button id="btnJd" class="btn btn-primary btn-block" style="margin-top:12px">
+                                <span class="glyphicon glyphicon-magic"></span> 生成 JD
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>生成结果</strong></div>
+                        <div class="panel-body">
+                            <pre id="jdResult" class="ai-result">输入岗位名后点击"生成 JD"，结果会显示在这里。</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块 B：制度问答 -->
+        <div role="tabpanel" class="tab-pane" id="tab-qa">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>制度问答</strong></div>
+                        <div class="panel-body">
+                            <p class="text-muted" style="font-size:12px">基于公司制度资料回答，资料没有会说"不知道"。</p>
+                            <label>你的问题</label>
+                            <input type="text" id="qaQuestion" class="form-control" placeholder="例如：报销款几天到账？迟到几次扣全勤？">
+                            <button id="btnQa" class="btn btn-primary btn-block" style="margin-top:12px">
+                                <span class="glyphicon glyphicon-question-sign"></span> 提问
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>AI 回答</strong></div>
+                        <div class="panel-body">
+                            <pre id="qaResult" class="ai-result">输入问题后点击"提问"，AI 会根据公司制度资料回答。</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块 C：数据点评 -->
+        <div role="tabpanel" class="tab-pane" id="tab-data">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>选择员工和月份</strong></div>
+                        <div class="panel-body">
+                            <p class="text-muted" style="font-size:12px">读取某员工当月薪资+考勤数据，AI 给出一句客观点评。</p>
+                            <label>员工</label>
+                            <select id="empSelect" class="form-control">
+                                {% for e in employees %}<option value="{{ e.id }}">{{ e.name }}（{{ e.depart.name }}）</option>{% endfor %}
+                            </select>
+                            <label style="margin-top:10px">月份</label>
+                            <input type="text" id="monthInput" class="form-control" placeholder="格式：2026-11">
+                            <button id="btnData" class="btn btn-primary btn-block" style="margin-top:12px">
+                                <span class="glyphicon glyphicon-stats"></span> 生成点评
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>AI 点评</strong></div>
+                        <div class="panel-body">
+                            <pre id="dataResult" class="ai-result">选择员工和月份后点击"生成点评"，结果会显示在这里。</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ai-page { max-width: 1100px; margin: 0 auto; }
+    .ai-header { margin-bottom: 16px; }
+    .ai-tabs { margin-bottom: 0; }
+    .ai-tab-content {
+        border: 1px solid #ddd;
+        border-top: none;
+        padding: 20px;
+        background: #fff;
+        border-radius: 0 0 4px 4px;
+    }
+    .ai-result {
+        background: #f8f9fa;
+        border: 1px solid #e8e8e8;
+        border-radius: 4px;
+        padding: 14px;
+        min-height: 220px;
+        white-space: pre-wrap;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+<script>
+    // 通用：按钮置灰 + 显示"思考中"，结束后恢复
+    function busy($btn, text) { $btn.prop('disabled', true).text(text); }
+    function done($btn, text) { $btn.prop('disabled', false).text(text); }
+
+    // 模块 A：招聘 JD
+    $('#btnJd').on('click', function () {
+        var $btn = $(this), $out = $('#jdResult');
+        var title = $('#jdTitle').val().trim();
+        if (!title) { alert('请输入岗位名称'); return; }
+        busy($btn, 'AI 生成中…'); $out.text('正在生成，请稍候…');
+        $.post('/ai/jd/', {title: title}, function (res) {
+            if (res.status) { $out.text(res.data); } else { alert(res.error); }
+        }).fail(function () { alert('请求失败，请检查网络或 AI 配置'); })
+          .always(function () { done($btn, '生成 JD'); });
+    });
+
+    // 模块 B：制度问答
+    $('#btnQa').on('click', function () {
+        var $btn = $(this), $out = $('#qaResult');
+        var q = $('#qaQuestion').val().trim();
+        if (!q) { alert('请输入问题'); return; }
+        busy($btn, 'AI 思考中…'); $out.text('正在思考，请稍候…');
+        $.post('/ai/qa/', {question: q}, function (res) {
+            if (res.status) { $out.text(res.data); } else { alert(res.error); }
+        }).fail(function () { alert('请求失败，请检查网络或 AI 配置'); })
+          .always(function () { done($btn, '提问'); });
+    });
+
+    // 模块 C：数据点评
+    $('#btnData').on('click', function () {
+        var $btn = $(this), $out = $('#dataResult');
+        var employee_id = $('#empSelect').val();
+        var month = $('#monthInput').val().trim();
+        if (!month) { alert('请填写月份，例如 2026-11'); return; }
+        busy($btn, 'AI 分析中…'); $out.text('正在分析，请稍候…');
+        $.post('/ai/data-comment/', {employee_id: employee_id, month: month}, function (res) {
+            if (res.status) { $out.text(res.data); } else { alert(res.error); }
+        }).fail(function () { alert('请求失败，请检查网络或 AI 配置'); })
+          .always(function () { done($btn, '生成点评'); });
+    });
+</script>
+{% endblock %}

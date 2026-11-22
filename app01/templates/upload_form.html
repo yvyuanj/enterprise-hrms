@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }} - 企业员工管理系统{% endblock %}
+{% block content %}
+<div class="panel panel-default panel-hrms form-card">
+    <div class="panel-heading"><span class="glyphicon glyphicon-open"></span> {{ title }}</div>
+    <div class="panel-body">
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                {% if field.name == 'img' %}
+                    {# 文件字段不套 form-control，单独渲染 #}
+                    <div class="form-group{% if field.errors %} has-error{% endif %}">
+                        <label class="control-label">{{ field.label }}</label>
+                        <input type="file" name="img" accept="image/*">
+                        {% if field.errors %}<ul class="errorlist">{{ field.errors|unordered_list }}</ul>{% endif %}
+                    </div>
+                {% else %}
+                    {% include '_field.html' with field=field %}
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">提 交</button>
+            <a href="{{ back_url|default:'/upload/form/' }}" class="btn btn-default">返回</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -228,8 +228,9 @@ class Salary(models.Model):
         return f'{self.employee.name} {self.month}'
 
     def save(self, *args, **kwargs):
-        # 实发自动计算：实发 = 基本工资 + 奖金 - 扣款
+        # 保存前按公式自动计算实发：实发 = 基本工资 + 奖金 - 扣款
         self.total = self.basic + self.bonus - self.deduction
+        # 原样透传参数调用父类保存，最终写入数据库
         super().save(*args, **kwargs)
 
 
@@ -278,6 +279,109 @@ class Task(models.Model):
         verbose_name = '任务'
         verbose_name_plural = verbose_name
         ordering = ['-create_time']
+
+    def __str__(self):
+        return self.title
+
+
+class Knowledge(models.Model):
+    """企业知识库（制度/手册条目），供 AI 制度问答做关键词检索。"""
+
+    title = models.CharField('标题', max_length=128)
+    content = models.TextField('内容')
+
+    class Meta:
+        db_table = 'hr_knowledge'
+        verbose_name = '知识库'
+        verbose_name_plural = verbose_name
+        ordering = ['id']
+
+    def __str__(self):
+        return self.title
+
+
+class Order(models.Model):
+    """订单（第18章：Ajax + JSON 接口）。
+
+    设计要点：
+    1. oid（订单号）与 admin（下单管理员）不让用户填，由后端生成/取当前登录用户，
+       因此在 Form 中用 exclude 排除，避免被篡改；
+    2. admin 关联自定义 User（而 User 又一一对应员工），因此订单管理员
+       必然是员工列表中的一员，数据链路完整。
+    """
+
+    STATUS_CHOICES = (
+        (1, '待支付'),
+        (2, '已支付'),
+    )
+
+    oid = models.CharField('订单号', max_length=64)
+    title = models.CharField('名称', max_length=32)
+    price = models.IntegerField('价格')
+    status = models.SmallIntegerField('状态', choices=STATUS_CHOICES, default=1)
+    admin = models.ForeignKey(
+        User, on_delete=models.PROTECT, verbose_name='管理员',
+        related_name='orders'
+    )
+    create_time = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        db_table = 'hr_order'
+        verbose_name = '订单'
+        verbose_name_plural = verbose_name
+        ordering = ['-id']
+
+    def __str__(self):
+        return f'{self.oid}-{self.title}'
+
+
+class Boss(models.Model):
+    """老板（第20章：普通 Form 上传，图片路径用 CharField 手工保存）。"""
+
+    name = models.CharField('姓名', max_length=32)
+    age = models.IntegerField('年龄')
+    img = models.CharField('头像', max_length=128)
+
+    class Meta:
+        db_table = 'hr_boss'
+        verbose_name = '老板'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+
+class City(models.Model):
+    """城市（第21章：FileField + MEDIA_ROOT，文件由 Django 自动保存）。
+
+    FileField 在数据库里存的是相对路径（如 city/xx.png），
+    真实文件落在 settings.MEDIA_ROOT 下，通过 /media/ 访问。
+    """
+
+    name = models.CharField('名称', max_length=32)
+    count = models.IntegerField('人口')
+    img = models.FileField('Logo', max_length=128, upload_to='city/')
+
+    class Meta:
+        db_table = 'hr_city'
+        verbose_name = '城市'
+        verbose_name_plural = verbose_name
+        ordering = ['id']
+
+    def __str__(self):
+        return self.name
+
+
+class XX(models.Model):
+    """头像预览示例（第20.4章：FileReader 本地预览 + ModelForm 自动保存）。"""
+
+    title = models.CharField('名称', max_length=32)
+    image = models.FileField('头像', upload_to='avatar/')
+
+    class Meta:
+        db_table = 'hr_xx'
+        verbose_name = '头像示例'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.title
