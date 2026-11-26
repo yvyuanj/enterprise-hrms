@@ -2,30 +2,10 @@
 {% block title %}首页 - 企业员工管理系统{% endblock %}
 {% block content %}
 <div class="row">
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card">
-            <div class="num">{{ depart_count }}</div>
-            <div class="label-text"><span class="glyphicon glyphicon-th"></span> 部门数量</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card c-green">
-            <div class="num">{{ employee_count }}</div>
-            <div class="label-text"><span class="glyphicon glyphicon-user"></span> 员工数量</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card c-orange">
-            <div class="num">{{ announcement_count }}</div>
-            <div class="label-text"><span class="glyphicon glyphicon-bullhorn"></span> 公告数量</div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="stat-card c-purple">
-            <div class="num">{{ salary_count }}</div>
-            <div class="label-text"><span class="glyphicon glyphicon-yen"></span> 薪资记录</div>
-        </div>
-    </div>
+    {% stat_card depart_count '部门数量' 'glyphicon-th' '' %}
+    {% stat_card employee_count '员工数量' 'glyphicon-user' 'c-green' %}
+    {% stat_card announcement_count '公告数量' 'glyphicon-bullhorn' 'c-orange' %}
+    {% stat_card salary_count '薪资记录' 'glyphicon-yen' 'c-purple' %}
 </div>
 
 <div class="row" style="margin-top:15px">

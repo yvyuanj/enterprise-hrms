@@ -58,6 +58,18 @@ def money(value):
         return value
 
 
+# ============ 自定义标签：渲染局部模板片段 ============
+@register.inclusion_tag('tags/stat_card.html')
+def stat_card(num, title, icon='glyphicon-th', css=''):
+    """渲染一张首页统计卡片，返回渲染后的 HTML 片段。
+
+    用法：{% stat_card depart_count '部门数量' 'glyphicon-th' %}
+    inclusion_tag 会把返回的字典作为上下文，套用 tags/stat_card.html 渲染，
+    最终把渲染好的 HTML 插到调用位置——这就是“自定义标签渲染局部模板片段”。
+    """
+    return {'num': num, 'title': title, 'icon': icon, 'css': css}
+
+
 @register.filter
 def avatar_url(employee):
     """头像 URL：无头像时使用默认占位图。"""
